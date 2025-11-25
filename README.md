@@ -55,7 +55,7 @@ Dependent deduction: R$ 189.59 per dependent
 
 Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/kuihtares/CltVsPj-Elixir.git
 cd CltVsPj-Elixir
 ```
 
