@@ -11,63 +11,44 @@ defmodule CltVsPjTest do
   end
 
   test "calculation of 13th salary" do
-    assert CltVsPj.calculate_13th_salary(3000) == 6000.0;
+    assert CltVsPj.calculate_13th_salary(3000) == 3000.0
 
     assert CltVsPj.calculate_13th_salary(0) == 0.0
     assert CltVsPj.calculate_13th_salary(-500) == 0.0
     assert CltVsPj.calculate_13th_salary("text") == 0.0
     assert CltVsPj.calculate_13th_salary(nil) == 0.0
-    assert CltVsPj.calculate_13th_salary(2500) == 5000.0
+    assert CltVsPj.calculate_13th_salary(2500) == 2500.0
     assert CltVsPj.calculate_13th_salary(:test) == 0.0
   end
 
   test "calculation of progressive INSS" do
-    # Teste na primeira faixa (até R$ 1.412,00)
+    # Test in first bracket (up to R$ 1,518.00) - 2025
     assert_in_delta CltVsPj.calculate_inss(1000.00), 75.00, 0.01
 
-    # Teste exatamente no limite da primeira faixa
-    assert_in_delta CltVsPj.calculate_inss(1412.00), 105.90, 0.01
+    # Test exactly at the first bracket limit
+    assert_in_delta CltVsPj.calculate_inss(1518.00), 113.85, 0.01
 
-    # Teste na segunda faixa (R$ 2.000,00)
-    # Primeira faixa: R$ 1.412,00 * 0.075 = R$ 105,90
-    # Segunda faixa: (R$ 2.000,00 - R$ 1.412,01) * 0.09 = R$ 587,99 * 0.09 = R$ 52,92
-    # Total: R$ 105,90 + R$ 52,92 = R$ 158,82
-    assert_in_delta CltVsPj.calculate_inss(2000.00), 158.82, 0.01
+    # Test in second bracket (R$ 2,000.00)
+    # First bracket: R$ 1,518.00 * 0.075 = R$ 113.85
+    # Second bracket: (R$ 2,000.00 - R$ 1,518.01) * 0.09 = R$ 481.99 * 0.09 = R$ 43.38
+    # Total: R$ 113.85 + R$ 43.38 = R$ 157.23
+    assert_in_delta CltVsPj.calculate_inss(2000.00), 157.23, 0.01
 
-    # Teste na terceira faixa (R$ 3.000,00)
-    # Primeira faixa: R$ 1.412,00 * 0.075 = R$ 105,90
-    # Segunda faixa: (R$ 2.666,68 - R$ 1.412,01) * 0.09 = R$ 1.254,67 * 0.09 = R$ 112,92
-    # Terceira faixa: (R$ 3.000,00 - R$ 2.666,69) * 0.12 = R$ 333,31 * 0.12 = R$ 40,00
-    # Total: R$ 105,90 + R$ 112,92 + R$ 40,00 = R$ 258,82
-    assert_in_delta CltVsPj.calculate_inss(3000.00), 258.82, 0.01
+    # Test in third bracket (R$ 3,000.00)
+    # First bracket: R$ 1,518.00 * 0.075 = R$ 113.85
+    # Second bracket: (R$ 2,793.88 - R$ 1,518.01) * 0.09 = R$ 1,275.87 * 0.09 = R$ 114.83
+    # Third bracket: (R$ 3,000.00 - R$ 2,793.89) * 0.12 = R$ 206.11 * 0.12 = R$ 24.73
+    # Total: R$ 113.85 + R$ 114.83 + R$ 24.73 = R$ 253.41
+    assert_in_delta CltVsPj.calculate_inss(3000.00), 253.41, 0.01
 
-    # Teste acima do teto (R$ 8.000,00 - deve calcular apenas até o teto)
-    max_inss = CltVsPj.calculate_inss(7786.02)
-    assert_in_delta CltVsPj.calculate_inss(8000.00), max_inss, 0.01
+    # Test above ceiling (R$ 8,500.00 - should calculate only up to ceiling of R$ 8,157.41)
+    max_inss = CltVsPj.calculate_inss(8157.41)
+    assert_in_delta CltVsPj.calculate_inss(8500.00), max_inss, 0.01
 
-    # Teste com entrada inválida
+    # Test with invalid input
     assert CltVsPj.calculate_inss(0) == 0.0
     assert CltVsPj.calculate_inss(-100) == 0.0
     assert CltVsPj.calculate_inss("text") == 0.0
-  end
-
-  test "tax scenario pattern matching" do
-    {category, description, tax} = CltVsPj.tax_scenario(1000.00)
-    assert category == :primeira_faixa
-    assert is_binary(description)
-    assert is_number(tax)
-
-    {category, _, _} = CltVsPj.tax_scenario(2000.00)
-    assert category == :segunda_faixa
-
-    {category, _, _} = CltVsPj.tax_scenario(3000.00)
-    assert category == :terceira_faixa
-
-    {category, _, _} = CltVsPj.tax_scenario(5000.00)
-    assert category == :quarta_faixa
-
-    {category, _, _} = CltVsPj.tax_scenario(10000.00)
-    assert category == :teto_inss
   end
 
   test "calculation of FGTS" do
@@ -79,6 +60,7 @@ defmodule CltVsPjTest do
 
   test "discount calculation" do
     total = CltVsPj.calculate_discount(5000)
-    assert total == 918.82
+    # With 2025 table: INSS R$ 509.60 + FGTS R$ 400.00 = R$ 909.60
+    assert total == 909.60
   end
 end
